@@ -1,11 +1,11 @@
 variable "PERSONAL_ACCESS_TOKEN" {}
 variable "REPO_OWNER" {}
 variable "REPO_NAME" {}
-variable "AWS_REGION" {}
+variable "AWS_DEFAULT_REGION" {}
 variable "AWS_SECRET_ACCESS_KEY" {}
 variable "AWS_ACCESS_KEY_ID" {}
 
-variable "PREFIX" {
+variable "prefix" {
   default = "ecs-runner"
 }
 
