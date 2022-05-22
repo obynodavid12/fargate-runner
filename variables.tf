@@ -1,9 +1,21 @@
 variable "PERSONAL_ACCESS_TOKEN" {}
-variable "REPO_OWNER" {}
-variable "REPO_NAME" {}
-variable "AWS_DEFAULT_REGION" {}
-variable "AWS_SECRET_ACCESS_KEY" {}
-variable "AWS_ACCESS_KEY_ID" {}
+variable "REPO_OWNER" {
+  default = "obynodavid12"
+}
+variable "REPO_NAME" {
+  default = "fargate-runner"  
+}
+variable "AWS_DEFAULT_REGION" {
+  default = "us-east-2"  
+}
+
+variable "AWS_SECRET_ACCESS_KEY" {
+  default = ""  
+}
+
+variable "AWS_ACCESS_KEY_ID" {
+  default = ""  
+}
 
 variable "prefix" {
   default = "ecs-runner"
