@@ -92,27 +92,27 @@ resource "aws_ecs_task_definition" "task_definition" {
       "command": ["./start.sh"],
       "environment": [{
         "name": "PERSONAL_ACCESS_TOKEN",
-        "value": "${PERSONAL_ACCESS_TOKEN}"
+        "value": "${var.PERSONAL_ACCESS_TOKEN}"
       },
       {
         "name": "REPO_OWNER",
-        "value": "${REPO_OWNER}"
+        "value": "${var.REPO_OWNER}"
       },
       {
         "name": "REPO_NAME",
-        "value": "${REPO_NAME}"
+        "value": "${var.REPO_NAME}"
       },
       {
         "name": "AWS_DEFAULT_REGION",
-        "value": "${AWS_DEFAULT_REGION}"
+        "value": "${var.AWS_DEFAULT_REGION}"
       },
       {
         "name": "AWS_SECRET_ACCESS_KEY",
-        "value": "${AWS_SECRET_ACCESS_KEY}"
+        "value": "${var.AWS_SECRET_ACCESS_KEY}"
       },
       {
         "name": "AWS_ACCESS_KEY_ID",
-        "value": "${AWS_ACCESS_KEY_ID}"
+        "value": "${var.AWS_ACCESS_KEY_ID}"
       }]
     }
   ]
