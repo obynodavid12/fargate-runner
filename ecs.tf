@@ -12,9 +12,9 @@ resource "aws_ecr_repository" "ECR_repository" {
 resource "aws_ecs_cluster" "ecs_cluster" {
   name = "${var.prefix}-cluster"
   capacity_providers = [
-    "FARGATE"]
+  "FARGATE"]
   setting {
-    name = "containerInsights"
+    name  = "containerInsights"
     value = "enabled"
   }
 }
@@ -56,7 +56,7 @@ resource "aws_iam_role_policy_attachment" "admin-policy-attachment" {
 # Task definition
 resource "aws_cloudwatch_log_group" "ecs-log-group" {
   name = "/ecs/${var.prefix}-task-def"
-  
+
 }
 
 resource "aws_ecs_task_definition" "task_definition" {
@@ -67,7 +67,7 @@ resource "aws_ecs_task_definition" "task_definition" {
   memory                   = "1024"
   task_role_arn            = aws_iam_role.ecs_task_execution_role.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  container_definitions = <<TASK_DEFINITION
+  container_definitions    = <<TASK_DEFINITION
   [
     {
       "name": "ecs-runner",
@@ -160,11 +160,11 @@ resource "aws_ecs_service" "ecs_service" {
 
 # Autoscaling
 resource "aws_appautoscaling_target" "dev_to_target" {
-  max_capacity = 2
-  min_capacity = 1
-  resource_id = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_service.name}"
+  max_capacity       = 2
+  min_capacity       = 1
+  resource_id        = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
-  service_namespace = "ecs"
+  service_namespace  = "ecs"
 }
 
 resource "aws_appautoscaling_policy" "dev_to_memory" {
@@ -179,16 +179,16 @@ resource "aws_appautoscaling_policy" "dev_to_memory" {
       predefined_metric_type = "ECSServiceAverageMemoryUtilization"
     }
 
-    target_value       = 80
+    target_value = 80
   }
 }
 
 resource "aws_appautoscaling_policy" "dev_to_cpu" {
-  name = "dev-to-cpu"
-  policy_type = "TargetTrackingScaling"
-  resource_id = aws_appautoscaling_target.dev_to_target.resource_id
+  name               = "dev-to-cpu"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.dev_to_target.resource_id
   scalable_dimension = aws_appautoscaling_target.dev_to_target.scalable_dimension
-  service_namespace = aws_appautoscaling_target.dev_to_target.service_namespace
+  service_namespace  = aws_appautoscaling_target.dev_to_target.service_namespace
 
   target_tracking_scaling_policy_configuration {
     predefined_metric_specification {
