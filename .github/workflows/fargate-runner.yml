@@ -19,7 +19,8 @@ jobs:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       REPO_NAME: ${{ secrets.REPO_NAME }}
       REPO_OWNER: ${{ secrets.REPO_OWNER }}
-     
+
+    
     # Checkout the repository to the GitHub Actions runner
     steps:
     - name: Checkout
@@ -76,10 +77,10 @@ jobs:
            
       
 
-    # - name: Terraform destroy
-    #   if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    #   id: destroy
-    #   run: terraform destroy -auto-approve
+    - name: Terraform destroy
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      id: destroy
+      run: terraform destroy -auto-approve
   
   build:
     needs: terraform
@@ -106,46 +107,28 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build the Docker image
+    - name: Docker Push
       env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-        run: docker build . --file Dockerfile --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest
-    
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      with:
-       image-ref: '${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:latest'
-       format: 'table'
-       exit-code: '1'
-       ignore-unfixed: true
-       vuln-type: 'os,library'
-       severity: 'CRITICAL,HIGH'
-    - name: Test Github API to see runner was actually registered and online
-      run: |
-        curl -s \
-          -H "Accept: application/vnd.github.v3+json" \
-          -u obynodavid12:${{ secrets.PERSONAL_ACCESS_TOKEN }} \
-          https://api.github.com/repos/obynodavid12/fargate-runner-aws/actions/runners \
-        | grep "online"   
-   
-    - name: Push docker image to Amazon ECR with just tag
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-        AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-        AWS_ACCESS_KEY_ID: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-        AWS_REGION: ${{secrets.AWS_REGION}}
-        AWS_ACCOUNT_ID: ${{secrets.AWS_ACCOUNT_ID}}
-        PERSONAL_ACCESS_TOKEN: ${{secrets.PERSONAL_ACCESS_TOKEN}}
-        REPO_OWNER: ${{ secrets.REPO_OWNER }}
+        IMAGE_TAG: ${{ github.sha }}
+        PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }} 
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
         REPO_NAME: ${{ secrets.REPO_NAME }}
-        run: |
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          aws ecs update-service --cluster ecs-runner-cluster --service ecs-runner-ecs-service --force-new-deployment
+        REPO_OWNER: ${{ secrets.REPO_OWNER }}
+      run: |  
+        docker build -f Dockerfile -q -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        echo "Pushing image to ECR..."
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG" 
+        aws ecs update-service --cluster ecs-runner-cluster --service ecs-runner-ecs-service --force-new-deployment
+        
+        
+        
+        
+        
     
-         
     
-      
