@@ -1,4 +1,6 @@
-variable "PERSONAL_ACCESS_TOKEN" {}
+variable "PERSONAL_ACCESS_TOKEN" {
+  default = ""
+}
 variable "REPO_OWNER" {
   default = "obynodavid12"
 }
