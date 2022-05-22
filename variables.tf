@@ -3,18 +3,18 @@ variable "REPO_OWNER" {
   default = "obynodavid12"
 }
 variable "REPO_NAME" {
-  default = "fargate-runner"  
+  default = "fargate-runner"
 }
 variable "AWS_DEFAULT_REGION" {
-  default = "us-east-2"  
+  default = "us-east-2"
 }
 
 variable "AWS_SECRET_ACCESS_KEY" {
-  default = ""  
+  default = ""
 }
 
 variable "AWS_ACCESS_KEY_ID" {
-  default = ""  
+  default = ""
 }
 
 variable "prefix" {
