@@ -199,23 +199,3 @@ resource "aws_appautoscaling_policy" "dev_to_cpu" {
   }
 }
 
-# Giving a Fargate access to the Secrets in the Secret Manager
-resource "aws_iam_role_policy" "password_policy_secretsmanager" {
-  name = "password-policy-secretsmanager"
-  role = aws_iam_role.ecs_task_execution_role.id
-
-  policy = <<-EOF
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Action": [
-          "secretsmanager:GetSecretValue"
-        ],
-        "Effect": "Allow",
-        "Resource": "*"
-      }
-    ]
-  }
-  EOF
-}
