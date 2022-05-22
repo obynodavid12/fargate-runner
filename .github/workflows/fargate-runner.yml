@@ -1,0 +1,151 @@
+name: "Terraform-Apply"
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    env:
+      PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }} 
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      REPO_NAME: ${{ secrets.REPO_NAME }}
+      REPO_OWNER: ${{ secrets.REPO_OWNER }}
+     
+    # Checkout the repository to the GitHub Actions runner
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1    
+      with:
+        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+        #cli_config_credentials_hostname: ${{ secrets.TF_HOSTNAME}}
+        terraform_wrapper: false
+
+    
+    - name: Terraform Format
+      id: fmt
+      run: terraform fmt -check
+
+    - name: Terraform Init
+      id: init
+      run: terraform init
+      
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color
+
+          
+    - name: Terraform Plan
+      id: plan
+      if: github.event_name == 'push'
+      run: terraform plan -no-color
+      continue-on-error: true
+
+    - name: Terraform Plan Status 
+      if: steps.plan.outcome == 'failure'
+      run: exit 1
+                  
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/master'
+      run: terraform apply -auto-approve -var "PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }}, REPO_OWNER=${{ secrets.REPO_OWNER }}, REPO_NAME=${{ secrets.REPO_NAME }}, AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}, AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}, AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" 
+                
+                
+    - name: Save Terraform Output
+      run: terraform output -json > tfoutput.json
+      shell: bash
+
+    - name: Upload output file
+      uses: actions/upload-artifact@v2
+      with:
+        name: terraform-output
+        path: |
+           tfoutput.json
+           
+      
+
+    # - name: Terraform destroy
+    #   if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    #   id: destroy
+    #   run: terraform destroy -auto-approve
+  
+  build:
+    needs: terraform
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download terraform output file
+      uses: actions/download-artifact@v2
+      with:
+        name: terraform-output
+        
+    - name: Checkout
+      uses: actions/checkout@v2
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+        
+   
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build the Docker image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+        run: docker build . --file Dockerfile --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      with:
+       image-ref: '${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:latest'
+       format: 'table'
+       exit-code: '1'
+       ignore-unfixed: true
+       vuln-type: 'os,library'
+       severity: 'CRITICAL,HIGH'
+    - name: Test Github API to see runner was actually registered and online
+      run: |
+        curl -s \
+          -H "Accept: application/vnd.github.v3+json" \
+          -u obynodavid12:${{ secrets.PERSONAL_ACCESS_TOKEN }} \
+          https://api.github.com/repos/obynodavid12/fargate-runner-aws/actions/runners \
+        | grep "online"   
+   
+    - name: Push docker image to Amazon ECR with just tag
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+        AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+        AWS_ACCESS_KEY_ID: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+        AWS_REGION: ${{secrets.AWS_REGION}}
+        AWS_ACCOUNT_ID: ${{secrets.AWS_ACCOUNT_ID}}
+        PERSONAL_ACCESS_TOKEN: ${{secrets.PERSONAL_ACCESS_TOKEN}}
+        REPO_OWNER: ${{ secrets.REPO_OWNER }}
+        REPO_NAME: ${{ secrets.REPO_NAME }}
+        run: |
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          aws ecs update-service --cluster ecs-runner-cluster --service ecs-runner-ecs-service --force-new-deployment
+    
+         
+    
+      
