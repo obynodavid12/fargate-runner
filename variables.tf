@@ -1,6 +1,6 @@
 variable "PERSONAL_ACCESS_TOKEN" {
-  description: "GitHub personal access token"  
-  type = string
+  description = "GitHub personal access token"  
+  type        = string
 }
 variable "REPO_OWNER" {
   default = "obynodavid12"
