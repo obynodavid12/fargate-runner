@@ -80,10 +80,10 @@ jobs:
            
       
 
-    # - name: Terraform destroy
-    #   if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    #   id: destroy
-    #   run: terraform destroy -auto-approve
+    - name: Terraform destroy
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      id: destroy
+      run: terraform destroy -auto-approve
   
   build:
     needs: terraform
@@ -123,7 +123,7 @@ jobs:
         REPO_NAME: ${{ secrets.REPO_NAME }}
         REPO_OWNER: ${{ secrets.REPO_OWNER }}
       run: |  
-        sed -i "s/<PERSONAL_ACCESS_TOKEN>/${{ secrets.PERSONAL_ACCESS_TOKEN }}/g" task.json 
+        #sed -i "s/<PERSONAL_ACCESS_TOKEN>/${{ secrets.PERSONAL_ACCESS_TOKEN }}/g" task.json 
         docker build -f Dockerfile -q -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         echo "Pushing image to ECR..."
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
