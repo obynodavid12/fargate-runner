@@ -59,22 +59,6 @@ resource "aws_cloudwatch_log_group" "ecs-log-group" {
 
 }
 
-data "template_file" "fargateapp-task-definition-template" {
-  template = file("templates/fargateapp.json.tpl")
-
-  vars = {
-    PERSONAL_ACCESS_TOKEN = "${var.PERSONAL_ACCESS_TOKEN}" # its env variable
-    REPO_OWNER            = var.REPO_OWNER
-    REPO_NAME             = var.REPO_NAME
-    AWS_DEFAULT_REGION    = var.AWS_DEFAULT_REGION
-    AWS_SECRET_ACCESS_KEY = var.AWS_SECRET_ACCESS_KEY
-    AWS_ACCESS_KEY_ID     = var.AWS_ACCESS_KEY_ID
-    prefix                = var.prefix
-    fargate_cpu           = var.fargate_cpu
-    fargate_memory        = var.fargate_memory
-  }
-}
-
 
 resource "aws_ecs_task_definition" "task_definition" {
   family                   = "${var.prefix}-task-def"
