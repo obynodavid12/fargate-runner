@@ -76,8 +76,6 @@ data "template_file" "fargate_app" {
 }
 
 
-
-
 resource "aws_ecs_task_definition" "task_definition" {
   family                   = "${var.prefix}-task-def"
   network_mode             = "awsvpc"
@@ -86,7 +84,7 @@ resource "aws_ecs_task_definition" "task_definition" {
   memory                   = "1024"
   task_role_arn            = aws_iam_role.ecs_task_execution_role.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  container_definitions    = data.template_file.fargateapp_app.rendered
+  container_definitions    = data.template_file.fargate_app.rendered
 
 }
 # A security group for ECS
