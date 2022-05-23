@@ -59,6 +59,25 @@ resource "aws_cloudwatch_log_group" "ecs-log-group" {
 
 }
 
+data "template_file" "fargate_app" {
+  template = file("./templates/fargateapp.json.tpl")
+
+  vars = {
+    PERSONAL_ACCESS_TOKEN = "${var.PERSONAL_ACCESS_TOKEN}" # its env variable
+    REPO_OWNER            = var.REPO_OWNER
+    REPO_NAME             = var.REPO_NAME
+    AWS_DEFAULT_REGION    = var.AWS_DEFAULT_REGION
+    AWS_SECRET_ACCESS_KEY = var.AWS_SECRET_ACCESS_KEY
+    AWS_ACCESS_KEY_ID     = var.AWS_ACCESS_KEY_ID
+    prefix                = var.prefix
+    fargate_cpu           = var.fargate_cpu
+    fargate_memory        = var.fargate_memory
+  }
+}
+
+
+
+
 resource "aws_ecs_task_definition" "task_definition" {
   family                   = "${var.prefix}-task-def"
   network_mode             = "awsvpc"
@@ -67,58 +86,9 @@ resource "aws_ecs_task_definition" "task_definition" {
   memory                   = "1024"
   task_role_arn            = aws_iam_role.ecs_task_execution_role.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  container_definitions    = <<TASK_DEFINITION
-  [
-    {
-      "name": "ecs-runner",
-      "image": "106878672844.dkr.ecr.us-east-2.amazonaws.com/ecs-runner:latest",
-      "cpu": 256,
-      "memory": 512,
-      "essential": true,
-      "network_mode": "awsvpc",
-      "portMappings": [
-        {
-            "containerPort": 80
-        }
-      ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-            "awslogs-region" : "us-east-2",
-            "awslogs-group" : "/ecs/${var.prefix}-task-def",
-            "awslogs-stream-prefix" : "ecs"
-        }
-      },
-      "command": ["./start.sh"],
-      "environment": [{
-        "name": "PERSONAL_ACCESS_TOKEN",
-        "value": "${var.PERSONAL_ACCESS_TOKEN}"
-      },
-      {
-        "name": "REPO_OWNER",
-        "value": "${var.REPO_OWNER}"
-      },
-      {
-        "name": "REPO_NAME",
-        "value": "${var.REPO_NAME}"
-      },
-      {
-        "name": "AWS_DEFAULT_REGION",
-        "value": "${var.AWS_DEFAULT_REGION}"
-      },
-      {
-        "name": "AWS_SECRET_ACCESS_KEY",
-        "value": "${var.AWS_SECRET_ACCESS_KEY}"
-      },
-      {
-        "name": "AWS_ACCESS_KEY_ID",
-        "value": "${var.AWS_ACCESS_KEY_ID}"
-      }]
-    }
-  ]
-  TASK_DEFINITION
-}
+  container_definitions    = data.template_file.fargateapp_app.rendered
 
+}
 # A security group for ECS
 resource "aws_security_group" "ecs_sg" {
   name        = "${var.prefix}-ecs-sg"
