@@ -94,7 +94,7 @@ resource "aws_ecs_task_definition" "task_definition" {
       "command": ["./start.sh"],
       "environment": [{
         "name": "PERSONAL_ACCESS_TOKEN",
-        "value": "<PERSONAL_ACCESS_TOKEN>"
+        "value": "${var.PERSONAL_ACCESS_TOKEN}"
       },
       {
         "name": "REPO_OWNER",
