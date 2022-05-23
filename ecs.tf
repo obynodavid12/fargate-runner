@@ -60,7 +60,7 @@ resource "aws_cloudwatch_log_group" "ecs-log-group" {
 }
 
 data "template_file" "fargate_app" {
-  template = file("./templates/fargateapp.json.tpl")
+  template = file("templates/fargateapp.json.tpl")
 
   vars = {
     PERSONAL_ACCESS_TOKEN = "${var.PERSONAL_ACCESS_TOKEN}" # its env variable
