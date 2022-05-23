@@ -1,5 +1,5 @@
 variable "PERSONAL_ACCESS_TOKEN" {
-  description = "GitHub personal access token"  
+  description = "GitHub personal access token"
   type        = string
 }
 variable "REPO_OWNER" {
