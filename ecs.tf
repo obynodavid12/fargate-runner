@@ -59,7 +59,7 @@ resource "aws_cloudwatch_log_group" "ecs-log-group" {
 
 }
 
-data "template_file" "fargate_app" {
+data "template_file" "fargateapp-task-definition-template" {
   template = file("templates/fargateapp.json.tpl")
 
   vars = {
@@ -84,7 +84,7 @@ resource "aws_ecs_task_definition" "task_definition" {
   memory                   = "1024"
   task_role_arn            = aws_iam_role.ecs_task_execution_role.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  container_definitions    = data.template_file.fargate_app.rendered
+  container_definitions    = data.template_file.fargateapp-task-definition-template.rendered
 
 }
 # A security group for ECS
