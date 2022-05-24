@@ -64,7 +64,7 @@ data "template_file" "fargateapp-task-definition-template" {
     AWS_ACCESS_KEY_ID     = var.AWS_ACCESS_KEY_ID
     PERSONAL_ACCESS_TOKEN = var.PERSONAL_ACCESS_TOKEN
     AWS_DEFAULT_REGION    = var.AWS_DEFAULT_REGION
-    AWS_SECRET_ACCESS_KEY = var.SECRET_ACCESS_KEY
+    AWS_SECRET_ACCESS_KEY = var.AWS_SECRET_ACCESS_KEY
     REPO_OWNER            = var.REPO_OWNER
     REPO_NAME             = var.REPO_NAME
     fargate_cpu           = var.fargate_cpu
