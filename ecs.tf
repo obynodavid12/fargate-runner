@@ -58,7 +58,22 @@ resource "aws_cloudwatch_log_group" "ecs-log-group" {
   name = "/ecs/${var.prefix}-task-def"
 
 }
+data "template_file" "fargateapp-task-definition-template" {
+  template = file("./templates/fargateapp.json.tpl")
+  vars = {
+    AWS_ACCESS_KEY_ID     = var.AWS_ACCESS_KEY_ID
+    PERSONAL_ACCESS_TOKEN = var.PERSONAL_ACCESS_TOKEN
+    AWS_DEFAULT_REGION    = var.AWS_DEFAULT_REGION
+    AWS_SECRET_ACCESS_KEY = var.SECRET_ACCESS_KEY
+    REPO_OWNER            = var.REPO_OWNER
+    REPO_NAME             = var.REPO_NAME
+    fargate_cpu           = var.fargate_cpu
+    fargate_memory        = var.fargate_memory
+    ecr_repo_url          = var.ecr_repo_url
+    prefix                = var.prefix
 
+  }
+}
 
 resource "aws_ecs_task_definition" "task_definition" {
   family                   = "${var.prefix}-task-def"
@@ -68,57 +83,8 @@ resource "aws_ecs_task_definition" "task_definition" {
   memory                   = "1024"
   task_role_arn            = aws_iam_role.ecs_task_execution_role.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  container_definitions    = <<TASK_DEFINITION
+  container_definitions    = data.template_file.fargateapp-task-definition-template.rendered
 
-[
-   {
-      "name": "ecs-runner",
-      "image": "106878672844.dkr.ecr.us-east-2.amazonaws.com/ecs-runner:latest",
-      "cpu": 256,
-      "memory": 512,
-      "essential": true,
-      "network_mode": "awsvpc",
-      "portMappings": [
-        {
-            "containerPort": 80
-        }
-      ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-            "awslogs-region" : "us-east-2",
-            "awslogs-group" : "/ecs/${var.prefix}-task-def",
-            "awslogs-stream-prefix" : "ecs"
-        }
-      },
-      "command": ["./start.sh"],
-      "environment": [{
-        "name": "PERSONAL_ACCESS_TOKEN",
-        "value": "${var.PERSONAL_ACCESS_TOKEN}"
-      },
-      {
-        "name": "REPO_OWNER",
-        "value": "${var.REPO_OWNER}"
-      },
-      {
-        "name": "REPO_NAME",
-        "value": "${var.REPO_NAME}"
-      },
-      {
-        "name": "AWS_DEFAULT_REGION",
-        "value": "${var.AWS_DEFAULT_REGION}"
-      },
-      {
-        "name": "AWS_SECRET_ACCESS_KEY",
-        "value": "${var.AWS_SECRET_ACCESS_KEY}"
-      },
-      {
-        "name": "AWS_ACCESS_KEY_ID",
-        "value": "${var.AWS_ACCESS_KEY_ID}"
-      }]
-    }
-]
-  TASK_DEFINITION
 }
 
 # A security group for ECS
@@ -158,46 +124,9 @@ resource "aws_ecs_service" "ecs_service" {
     subnets          = [aws_subnet.private_subnet.id]
     assign_public_ip = false
   }
+
+  tags = {
+    Name = "${var.prefix}_ecs_service"
+  }
 }
-
-# Autoscaling
-# resource "aws_appautoscaling_target" "dev_to_target" {
-#   max_capacity       = 2
-#   min_capacity       = 1
-#   resource_id        = "service/${aws_ecs_cluster.ecs_cluster.name}/${aws_ecs_service.ecs_service.name}"
-#   scalable_dimension = "ecs:service:DesiredCount"
-#   service_namespace  = "ecs"
-# }
-
-# resource "aws_appautoscaling_policy" "dev_to_memory" {
-#   name               = "dev-to-memory"
-#   policy_type        = "TargetTrackingScaling"
-#   resource_id        = aws_appautoscaling_target.dev_to_target.resource_id
-#   scalable_dimension = aws_appautoscaling_target.dev_to_target.scalable_dimension
-#   service_namespace  = aws_appautoscaling_target.dev_to_target.service_namespace
-
-#   target_tracking_scaling_policy_configuration {
-#     predefined_metric_specification {
-#       predefined_metric_type = "ECSServiceAverageMemoryUtilization"
-#     }
-
-#     target_value = 80
-#   }
-# }
-
-# resource "aws_appautoscaling_policy" "dev_to_cpu" {
-#   name               = "dev-to-cpu"
-#   policy_type        = "TargetTrackingScaling"
-#   resource_id        = aws_appautoscaling_target.dev_to_target.resource_id
-#   scalable_dimension = aws_appautoscaling_target.dev_to_target.scalable_dimension
-#   service_namespace  = aws_appautoscaling_target.dev_to_target.service_namespace
-
-#   target_tracking_scaling_policy_configuration {
-#     predefined_metric_specification {
-#       predefined_metric_type = "ECSServiceAverageCPUUtilization"
-#     }
-
-#     target_value = 60
-#   }
-# }
 
