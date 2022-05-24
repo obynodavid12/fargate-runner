@@ -71,9 +71,9 @@ resource "aws_ecs_task_definition" "task_definition" {
   [
     {
       "name": "ecs-runner",
-      "image": "${ecr_repo_url}",
-      "cpu": ${fargate_cpu},
-      "memory": ${fargate_memory},
+      "image": "106878672844.dkr.ecr.us-east-2.amazonaws.com/ecs-runner:latest",
+      "cpu": 256,
+      "memory": 512,
       "essential": true,
       "network_mode": "awsvpc",
       "portMappings": [
