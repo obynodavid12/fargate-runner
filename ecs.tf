@@ -52,7 +52,6 @@ resource "aws_iam_role_policy_attachment" "admin-policy-attachment" {
 }
 
 
-
 # Task definition
 resource "aws_cloudwatch_log_group" "ecs-log-group" {
   name = "/ecs/${var.prefix}-task-def"
