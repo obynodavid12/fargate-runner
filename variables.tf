@@ -51,13 +51,13 @@ variable "public_subnet_cidr" {
 variable "fargate_cpu" {
   description = "Fargate instance CPU units to provision"
   type        = number
-  default     = 256
+  default     = "256"
 }
 
 variable "fargate_memory" {
   description = "Fargate instance memory units to provision"
   type        = number
-  default     = 512
+  default     = "512"
 }
 
 variable "ecr_repo_url" {
