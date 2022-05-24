@@ -58,22 +58,6 @@ resource "aws_cloudwatch_log_group" "ecs-log-group" {
   name = "/ecs/${var.prefix}-task-def"
 
 }
-data "template_file" "fargateapp-task-definition-template" {
-  template = file("./templates/fargateapp.json.tpl")
-  vars = {
-    AWS_ACCESS_KEY_ID     = var.AWS_ACCESS_KEY_ID
-    PERSONAL_ACCESS_TOKEN = var.PERSONAL_ACCESS_TOKEN
-    AWS_DEFAULT_REGION    = var.AWS_DEFAULT_REGION
-    AWS_SECRET_ACCESS_KEY = var.AWS_SECRET_ACCESS_KEY
-    REPO_OWNER            = var.REPO_OWNER
-    REPO_NAME             = var.REPO_NAME
-    fargate_cpu           = var.fargate_cpu
-    fargate_memory        = var.fargate_memory
-    ecr_repo_url          = var.ecr_repo_url
-    prefix                = var.prefix
-
-  }
-}
 
 resource "aws_ecs_task_definition" "task_definition" {
   family                   = "${var.prefix}-task-def"
@@ -83,8 +67,44 @@ resource "aws_ecs_task_definition" "task_definition" {
   memory                   = "1024"
   task_role_arn            = aws_iam_role.ecs_task_execution_role.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  container_definitions    = data.template_file.fargateapp-task-definition-template.rendered
-
+  container_definitions    = <<TASK_DEFINITION
+  [
+    {
+      "name": "ecs-runner",
+      "image": "${ecr_repo_url}",
+      "cpu": ${fargate_cpu},
+      "memory": ${fargate_memory},
+      "essential": true,
+      "network_mode": "awsvpc",
+      "portMappings": [
+        {
+          "containerPort": 80
+        } 
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+            "awslogs-region": "us-east-2",
+            "awslogs-group": "/ecs/${var.prefix}-task-def",
+            "awslogs-stream-prefix": "ecs" 
+        
+        }
+      },
+      "command": ["./start.sh"],
+      "secrets": [
+        {"name": "PERSONAL_ACCESS_TOKEN", "valueFrom": "${aws_secretsmanager_secret.PERSONAL_ACCESS_TOKEN.arn}"},
+        {"name": "AWS_SECRET_ACCESS_KEY", "valueFrom": "${aws_secretsmanager_secret.AWS_SECRET_ACCESS_KEY.arn}"},
+        {"name": "AWS_ACCESS_KEY_ID", "valueFrom": "${aws_secretsmanager_secret.AWS_ACCESS_KEY_ID.arn}"},
+        {"name": "AWS_DEFAULT_REGION", "valueFrom": "${aws_secretsmanager_secret.AWS_DEFAULT_REGION.arn}"}
+      ],
+      "environment": [
+        {"name": "REPO_OWNER", "value": "${var.REPO_OWNER}"},
+        {"name": "REPO_NAME", "value": "${var.REPO_NAME}"}
+      ]
+       
+    }
+  ]
+  TASK_DEFINITION
 }
 
 # A security group for ECS
