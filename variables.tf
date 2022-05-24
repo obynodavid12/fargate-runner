@@ -1,21 +1,25 @@
 variable "PERSONAL_ACCESS_TOKEN" {
   description = "GitHub personal access token"
   type        = string
+  default     = ""
 }
 
 variable "AWS_DEFAULT_REGION" {
   description = "aws default region"
   type        = string
+  default     = ""
 }
 
 variable "AWS_SECRET_ACCESS_KEY" {
   description = "aws secret access token"
   type        = string
+  default     = ""
 }
 
 variable "AWS_ACCESS_KEY_ID" {
   description = "aws access key"
   type        = string
+  default     = ""
 }
 
 variable "REPO_OWNER" {
