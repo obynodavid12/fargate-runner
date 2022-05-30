@@ -1,6 +1,6 @@
 variable "PAT" {
   description = "GitHub personal access token"
-  type        = "string"
+  type        = string
 }
 
 variable "region" {
@@ -14,11 +14,11 @@ variable "profile" {
 }
 
 variable "REPO_OWNER" {
-  type = "string"
+  type = string
   # default = "obynodavid12"
 }
 variable "REPO_NAME" {
-  type = "string"
+  type = string
   #default = "fargate-runner"
 }
 
