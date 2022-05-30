@@ -1,7 +1,4 @@
-variable "PAT_ACCESS_TOKEN" {
-  description = "AWS SecretsManager ARN for personal access token"
-  type        = string
-}
+variable "PAT_ACCESS_TOKEN" {}
 
 variable "region" {
   description = "aws default region"
@@ -17,22 +14,10 @@ variable "secret_retention_days" {
   default     = 0
   description = "Number of days before secret is actually deleted. Increasing this above 0 will result in Terraform errors if you redeploy to the same workspace."
 }
-variable "RUNNER_NAME" {
-  description = "the name of the runner"
-  type        = string
-  default     = "fargate-runner"
-}
-variable "RUNNER_LABELS" {
-  description = "the name of the self hosted runner"
-  type        = string
-  default     = "fargate-runner"
-}
+variable "RUNNER_NAME" {}
+variable "RUNNER_LABELS" {}
 
-variable "RUNNER_REPOSITORY_URL" {
-  description = "the url of the repository"
-  type        = string
-  default     = "https://github.com/obynodavid12/fargate-runner"
-}
+variable "RUNNER_REPOSITORY_URL" {}
 
 variable "prefix" {
   default = "ecs-runner"
