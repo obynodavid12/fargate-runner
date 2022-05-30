@@ -13,13 +13,15 @@ variable "profile" {
   default = "default"
 }
 
-variable "REPO_OWNER" {
+variable "RUNNER_REPOSITORY_URL" {
   type = string
-  # default = "obynodavid12"
 }
-variable "REPO_NAME" {
+variable "RUNNER_LABELS" {
   type = string
-  #default = "fargate-runner"
+}
+
+variable "RUNNER_NAME" {
+  type = string
 }
 
 variable "prefix" {

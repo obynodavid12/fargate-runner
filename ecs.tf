@@ -89,14 +89,15 @@ resource "aws_ecs_task_definition" "task_definition" {
         
         }
       },
-      "command": ["./start.sh"],
+      "entryPoint": ["/entrypoint.sh"],
+      "command": ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"],
       "secrets": [
         {"name": "PAT", "valueFrom": "${aws_secretsmanager_secret.PAT.arn}"}
-        
       ],
       "environment": [
-        {"name": "REPO_OWNER", "value": "${var.REPO_OWNER}"},
-        {"name": "REPO_NAME", "value": "${var.REPO_NAME}"}
+        {"name": "RUNNER_REPOSITORY_URL", "value": "${var.RUNNER_REPOSITORY_URL}"},
+        {"name": "RUNNER_NAME", "value": "${var.RUNNER_NAME}"},
+        {"name": "RUNNER_LABELS", "value": "${var.RUNNER_LABELS}"}
       ]
        
     }

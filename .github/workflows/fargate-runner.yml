@@ -12,13 +12,15 @@ jobs:
     name: 'Terraform'
     runs-on: ubuntu-latest
     env:
-      PAT: ${{ secrets.PAT }} 
+      PAT: ${{ secrets.PAT }}
+      ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }} 
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-      REPO_NAME: ${{ secrets.REPO_NAME }}
-      REPO_OWNER: ${{ secrets.REPO_OWNER }}
+      RUNNER_NAME: ${{ secrets.RUNNER_NAME }}
+      RUNNER_REPOSITORY_URL: ${{ secrets.RUNNER_REPOSITORY_URL }}
+      RUNNER_LABELS: ${{ secrets.RUNNER_LABELS }}
 
     
     # Checkout the repository to the GitHub Actions runner
@@ -52,7 +54,7 @@ jobs:
     - name: Terraform Plan
       id: plan
       if: github.event_name == 'push'
-      run: terraform plan -no-color -input=false -var "PAT=${{ secrets.PAT }}" -var "REPO_OWNER=${{ secrets.REPO_OWNER }}" -var "REPO_NAME=${{ secrets.REPO_NAME }}"
+      run: terraform plan -no-color -input=false -var "PAT=${{ secrets.PAT }}" -var "RUNNER_REPOSITORY_URL=${{ secrets.RUNNER_REPOSITORY_URL }}" -var "RUNNER_NAME=${{ secrets.RUNNER_NAME }}" -var "RUNNER_LABELS=${{ secrets.RUNNER_LABELS }}"
       continue-on-error: true
 
     - name: Terraform Plan Status 
@@ -64,8 +66,8 @@ jobs:
       run: |
         # chmod +x tf_apply.sh
         # ./tf_apply.sh
-        terraform apply -auto-approve -input=false -var "PAT=${{ secrets.PAT }}" -var "REPO_OWNER=${{ secrets.REPO_OWNER }}" -var "REPO_NAME=${{ secrets.REPO_NAME }}"
-        #terraform apply -auto-approve -var "PERSONAL_ACCESS_TOKEN=${{ secrets.PAT }}, REPO_OWNER=${{ secrets.REPO_OWNER }}, REPO_NAME=${{ secrets.REPO_NAME }}, AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}, AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}, AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" 
+        terraform apply -auto-approve -input=false -var "PAT=${{ secrets.PAT }}" -var "RUNNER_REPOSITORY_URL=${{ secrets.RUNNER_REPOSITORY_URL }}" -var "RUNNER_NAME=${{ secrets.RUNNER_NAME }}" -var "RUNNER_LABELS=${{ secrets.RUNNER_LABELS }}"
+         
                 
                 
     - name: Save Terraform Output
@@ -120,8 +122,9 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
         AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-        REPO_NAME: ${{ secrets.REPO_NAME }}
-        REPO_OWNER: ${{ secrets.REPO_OWNER }}
+        RUNNER_NAME: ${{ secrets.RUNNER_NAME }}
+        RUNNER_REPOSITORY_URL: ${{ secrets.RUNNER_REPOSITORY_URL }}
+        RUNNER_LABELS: ${{ secrets.RUNNER_LABELS }}
       run: |  
         docker build -f Dockerfile -q -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         echo "Pushing image to ECR..."
