@@ -18,9 +18,9 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-      RUNNER_NAME: ${{ secrets.RUNNER_NAME }}
-      RUNNER_REPOSITORY_URL: ${{ secrets.RUNNER_REPOSITORY_URL }}
-      RUNNER_LABELS: ${{ secrets.RUNNER_LABELS }}
+      RUNNER_NAME: fargate-runner
+      RUNNER_REPOSITORY_URL: https://github.com/obynodavid12/fargate-runner
+      RUNNER_LABELS: fargate-runner
 
     
     # Checkout the repository to the GitHub Actions runner
@@ -54,7 +54,7 @@ jobs:
     - name: Terraform Plan
       id: plan
       if: github.event_name == 'push'
-      run: terraform plan -no-color -input=false -var "PAT_ACCESS_TOKEN=${{ secrets.PAT_ACCESS_TOKEN }}" -var "RUNNER_REPOSITORY_URL=${{ secrets.RUNNER_REPOSITORY_URL }}" -var "RUNNER_NAME=${{ secrets.RUNNER_NAME }}" -var "RUNNER_LABELS=${{ secrets.RUNNER_LABELS }}"
+      run: terraform plan -no-color 
       continue-on-error: true
 
     - name: Terraform Plan Status 
@@ -66,7 +66,7 @@ jobs:
       run: |
         # chmod +x tf_apply.sh
         # ./tf_apply.sh
-        terraform apply -auto-approve -input=false -var "PAT_ACCESS_TOKEN=${{ secrets.PAT_ACCESS_TOKEN }}" -var "RUNNER_REPOSITORY_URL=${{ secrets.RUNNER_REPOSITORY_URL }}" -var "RUNNER_NAME=${{ secrets.RUNNER_NAME }}" -var "RUNNER_LABELS=${{ secrets.RUNNER_LABELS }}"
+        terraform apply -auto-approve -input=false -var "PAT_ACCESS_TOKEN=${{ secrets.PAT_ACCESS_TOKEN }}" -var "RUNNER_REPOSITORY_URL=${{ env.RUNNER_REPOSITORY_URL }}" -var "RUNNER_NAME=${{ env.RUNNER_NAME }}" -var "RUNNER_LABELS=${{ env.RUNNER_LABELS }}"
          
                 
                 
@@ -122,9 +122,9 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
         AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-        RUNNER_NAME: ${{ secrets.RUNNER_NAME }}
-        RUNNER_REPOSITORY_URL: ${{ secrets.RUNNER_REPOSITORY_URL }}
-        RUNNER_LABELS: ${{ secrets.RUNNER_LABELS }}
+        RUNNER_NAME: fargate-runner
+        RUNNER_REPOSITORY_URL: https://github.com/obynodavid12/fargate-runner
+        RUNNER_LABELS: fargate-runner
       run: |  
         docker build -f Dockerfile -q -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         echo "Pushing image to ECR..."

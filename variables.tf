@@ -1,6 +1,7 @@
 variable "PAT_ACCESS_TOKEN" {
-  description = "GitHub personal access token"
+  description = "AWS SecretsManager ARN for personal access token"
   type        = string
+  default     = ""
 }
 
 variable "region" {
@@ -17,15 +18,21 @@ variable "secret_retention_days" {
   default     = 0
   description = "Number of days before secret is actually deleted. Increasing this above 0 will result in Terraform errors if you redeploy to the same workspace."
 }
-variable "RUNNER_REPOSITORY_URL" {
-  type = string
+variable "RUNNER_NAME" {
+  description = "the name of the runner"
+  type        = string
+  default     = "fargate-runner"
 }
 variable "RUNNER_LABELS" {
-  type = string
+  description = "the name of the self hosted runner"
+  type        = string
+  default     = "fargate-runner"
 }
 
-variable "RUNNER_NAME" {
-  type = string
+variable "RUNNER_REPOSITORY_URL" {
+  description = "the url of the repository"
+  type        = string
+  default     = "https://github.com/obynodavid12/fargate-runner"
 }
 
 variable "prefix" {
@@ -47,19 +54,19 @@ variable "public_subnet_cidr" {
   default     = "172.31.48.0/20"
 }
 
-variable "fargate_cpu" {
-  description = "Fargate instance CPU units to provision"
-  type        = number
-  default     = "256"
-}
+# variable "fargate_cpu" {
+#   description = "Fargate instance CPU units to provision"
+#   type        = number
+#   default     = "256"
+# }
 
-variable "fargate_memory" {
-  description = "Fargate instance memory units to provision"
-  type        = number
-  default     = "512"
-}
+# variable "fargate_memory" {
+#   description = "Fargate instance memory units to provision"
+#   type        = number
+#   default     = "512"
+# }
 
-variable "ecr_repo_url" {
-  description = "Docker image to be run in the ECS cluster"
-  default     = "106878672844.dkr.ecr.us-east-2.amazonaws.com/ecs-runner:latest"
-}
+# variable "ecr_repo_url" {
+#   description = "Docker image to be run in the ECS cluster"
+#   default     = "106878672844.dkr.ecr.us-east-2.amazonaws.com/ecs-runner:latest"
+# }
