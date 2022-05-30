@@ -70,9 +70,9 @@ resource "aws_ecs_task_definition" "task_definition" {
   [
     {
       "name": "ecs-runner",
-      "image": "106878672844.dkr.ecr.us-east-2.amazonaws.com/ecs-runner:latest",
-      "cpu": 256,
-      "memory": 512,
+      "image": "${var.ecr_repo_url}",
+      "cpu": "${var.fargate_cpu}",
+      "memory": "${var.fargate_memory}",
       "essential": true,
       "network_mode": "awsvpc",
       "portMappings": [
@@ -90,8 +90,10 @@ resource "aws_ecs_task_definition" "task_definition" {
         }
       },
       "command": ["./start.sh"],
-      "secrets": [{"name": "RUNNER_ACCESS_TOKEN", "valueFrom": "${aws_secretsmanager_secret.RUNNER_ACCESS_TOKEN.arn}"}],
+      "secrets": [
+        {"name": "RUNNER_ACCESS_TOKEN", "valueFrom": "${aws_secretsmanager_secret.RUNNER_ACCESS_TOKEN.arn}"}
         
+      ],
       "environment": [
         {"name": "REPO_OWNER", "value": "${var.REPO_OWNER}"},
         {"name": "REPO_NAME", "value": "${var.REPO_NAME}"}
@@ -103,29 +105,29 @@ resource "aws_ecs_task_definition" "task_definition" {
 }
 
 # A security group for ECS
-# resource "aws_security_group" "ecs_sg" {
-#   name        = "${var.prefix}-ecs-sg"
-#   description = "Allow incoming traffic for ecs"
-#   vpc_id      = aws_vpc.vpc.id
+resource "aws_security_group" "ecs_sg" {
+  name        = "${var.prefix}-ecs-sg"
+  description = "Allow incoming traffic for ecs"
+  vpc_id      = aws_vpc.vpc.id
 
-#   ingress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-#   tags = {
-#     Name = "${var.prefix}_ecs_sg"
-#   }
-# }
+  tags = {
+    Name = "${var.prefix}_ecs_sg"
+  }
+}
 
 resource "aws_ecs_service" "ecs_service" {
   name            = "${var.prefix}-ecs-service"
@@ -135,8 +137,8 @@ resource "aws_ecs_service" "ecs_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    security_groups  = [var.security_group_id]
-    subnets          = var.private_subnet_ids
+    security_groups  = [aws_security_group.ecs_sg.id]
+    subnets          = [aws_subnet.private_subnet.id]
     assign_public_ip = false
   }
 
@@ -144,4 +146,3 @@ resource "aws_ecs_service" "ecs_service" {
     Name = "${var.prefix}_ecs_service"
   }
 }
-

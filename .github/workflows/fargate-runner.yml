@@ -12,7 +12,7 @@ jobs:
     name: 'Terraform'
     runs-on: ubuntu-latest
     env:
-      PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }} 
+      RUNNER_ACCESS_TOKEN: ${{ secrets.RUNNER_ACCESS_TOKEN }} 
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
@@ -62,9 +62,10 @@ jobs:
     - name: Terraform Apply
       if: github.ref == 'refs/heads/master'
       run: |
-        chmod +x tf_apply.sh
-        ./tf_apply.sh
-      #terraform apply -auto-approve -var "PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }}, REPO_OWNER=${{ secrets.REPO_OWNER }}, REPO_NAME=${{ secrets.REPO_NAME }}, AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}, AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}, AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" 
+        # chmod +x tf_apply.sh
+        # ./tf_apply.sh
+        terraform apply -auto-approve -var "RUNNER_ACCESS_TOKEN=${{ secrets.RUNNER_ACCESS_TOKEN }}, REPO_OWNER=${{ secrets.REPO_OWNER }}, REPO_NAME=${{ secrets.REPO_NAME }}"
+        #terraform apply -auto-approve -var "PERSONAL_ACCESS_TOKEN=${{ secrets.RUNNER_ACCESS_TOKEN }}, REPO_OWNER=${{ secrets.REPO_OWNER }}, REPO_NAME=${{ secrets.REPO_NAME }}, AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}, AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}, AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" 
                 
                 
     - name: Save Terraform Output
@@ -84,50 +85,49 @@ jobs:
   #     id: destroy
   #     run: terraform destroy -auto-approve
   
-  # build:
-  #   needs: terraform
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Download terraform output file
-  #     uses: actions/download-artifact@v2
-  #     with:
-  #       name: terraform-output
+  build:
+    needs: terraform
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download terraform output file
+      uses: actions/download-artifact@v2
+      with:
+        name: terraform-output
         
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
     
-  #   - name: Configure AWS credentials
-  #     uses: aws-actions/configure-aws-credentials@v1
-  #     with:
-  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #       aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
-  #       ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         
    
-  #   - name: Login to Amazon ECR
-  #     id: login-ecr
-  #     uses: aws-actions/amazon-ecr-login@v1
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
-  #   - name: Docker Push
-  #     env:
-  #       ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  #       ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-  #       IMAGE_TAG: ${{ github.sha }}
-  #       PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }} 
-  #       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #       AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-  #       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-  #       REPO_NAME: ${{ secrets.REPO_NAME }}
-  #       REPO_OWNER: ${{ secrets.REPO_OWNER }}
-  #     run: |  
-  #       #sed -i "s/<PERSONAL_ACCESS_TOKEN>/${{ secrets.PERSONAL_ACCESS_TOKEN }}/g" task.json 
-  #       docker build -f Dockerfile -q -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-  #       echo "Pushing image to ECR..."
-  #       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-  #       echo "::set-output name=image::$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG" 
-  #       aws ecs update-service --cluster ecs-runner-cluster --service ecs-runner-ecs-service --force-new-deployment
+    - name: Docker Push
+      env:
+        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+        RUNNER_ACCESS_TOKEN: ${{ secrets.RUNNER_ACCESS_TOKEN }} 
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        REPO_NAME: ${{ secrets.REPO_NAME }}
+        REPO_OWNER: ${{ secrets.REPO_OWNER }}
+      run: |  
+        docker build -f Dockerfile -q -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        echo "Pushing image to ECR..."
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG" 
+        aws ecs update-service --cluster ecs-runner-cluster --service ecs-runner-ecs-service --force-new-deployment
         
         
         

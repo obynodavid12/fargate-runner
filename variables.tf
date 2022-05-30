@@ -1,15 +1,24 @@
 variable "RUNNER_ACCESS_TOKEN" {
   description = "GitHub personal access token"
   type        = string
-  default     = ""
+  #default     = ""
 }
 
-# variable "AWS_DEFAULT_REGION" {
-#   description = "aws default region"
+# variable "PERSONAL_ACCESS_TOKEN" {
+#   description = "GitHub personal access token"
 #   type        = string
-#   default     = "us-east-2"
+#   default     = ""
 # }
 
+variable "region" {
+  description = "aws default region"
+  type        = string
+  default     = "us-east-2"
+}
+
+variable "profile" {
+  default = "default"
+}
 
 # variable "AWS_SECRET_ACCESS_KEY" {
 #   description = "aws secret access token"
@@ -24,49 +33,46 @@ variable "RUNNER_ACCESS_TOKEN" {
 # }
 
 variable "REPO_OWNER" {
-  default = "obynodavid12"
+  type = string
+  # default = "obynodavid12"
 }
 variable "REPO_NAME" {
-  default = "fargate-runner"
+  type = string
+  #default = "fargate-runner"
 }
 
 variable "prefix" {
   default = "ecs-runner"
 }
 
-variable "vpc_id" {
-  description = "VPC ID"
-  default     = "vpc-096711145f4fb2bd6"
+variable "vpc_cidr" {
+  description = "CIDR for the VPC"
+  default     = "172.31.0.0/16"
 }
 
-variable "private_subnet_ids" {
-  description = "Private Subnet"
-  type = list(string)
-  default     = ["subnet-0009935232387340e","subnet-0261ff6eaa616becb"]
+variable "private_subnet_cidr" {
+  description = "CIDR for the Private Subnet"
+  default     = "172.31.32.0/20"
 }
 
-# variable "public_subnet_cidr" {
-#   description = "CIDR for the Public Subnet"
-#   default     = "172.31.48.0/20"
-# }
-
-variable "security_group_id" {
-  default = "sg-0b543d3055cffedfb"
+variable "public_subnet_cidr" {
+  description = "CIDR for the Public Subnet"
+  default     = "172.31.48.0/20"
 }
-# variable "fargate_cpu" {
-#   description = "Fargate instance CPU units to provision"
-#   type        = number
-#   default     = "256"
-# }
 
-# variable "fargate_memory" {
-#   description = "Fargate instance memory units to provision"
-#   type        = number
-#   default     = "512"
-# }
+variable "fargate_cpu" {
+  description = "Fargate instance CPU units to provision"
+  type        = number
+  default     = "256"
+}
 
-# variable "ecr_repo_url" {
-#   description = "Docker image to be run in the ECS cluster"
-#   default     = "106878672844.dkr.ecr.us-east-2.amazonaws.com/ecs-runner:latest"
-# }
+variable "fargate_memory" {
+  description = "Fargate instance memory units to provision"
+  type        = number
+  default     = "512"
+}
 
+variable "ecr_repo_url" {
+  description = "Docker image to be run in the ECS cluster"
+  default     = "106878672844.dkr.ecr.us-east-2.amazonaws.com/ecs-runner:latest"
+}
