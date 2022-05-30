@@ -2,8 +2,8 @@
 set -e
 
 mkdir actions-runner && cd actions-runner
-curl -O -L https://github.com/actions/runner/releases/download/v2.276.1/actions-runner-linux-x64-2.276.1.tar.gz
-tar xzf ./actions-runner-linux-x64-2.276.1.tar.gz
+curl -O -L https://github.com/actions/runner/releases/download/v2.291.1/actions-runner-linux-x64-2.291.1.tar.gz
+tar xzf ./actions-runner-linux-x64-2.291.1.tar.gz
 ./bin/installdependencies.sh
 mkdir /_work
 
