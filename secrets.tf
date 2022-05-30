@@ -1,11 +1,11 @@
 # Secrets
-resource "aws_secretsmanager_secret" "RUNNER_ACCESS_TOKEN" {
-  name = "${var.prefix}-RUNNER_ACCESS_TOKEN"
+resource "aws_secretsmanager_secret" "PAT" {
+  name = "${var.prefix}-PAT"
 }
 
-resource "aws_secretsmanager_secret_version" "RUNNER_ACCESS_TOKEN" {
-  secret_id     = aws_secretsmanager_secret.RUNNER_ACCESS_TOKEN.id
-  secret_string = var.RUNNER_ACCESS_TOKEN
+resource "aws_secretsmanager_secret_version" "PAT" {
+  secret_id     = aws_secretsmanager_secret.PAT.id
+  secret_string = var.PAT
 }
 
 # resource "aws_secretsmanager_secret" "REPO_OWNER" {
@@ -67,7 +67,7 @@ resource "aws_iam_role_policy" "password_policy_secretsmanager" {
           "secretsmanager:GetSecretValue"
         ],
         "Effect": "Allow",
-        "Resource": "${aws_secretsmanager_secret.RUNNER_ACCESS_TOKEN.arn}"
+        "Resource": "${aws_secretsmanager_secret.PAT.arn}"
       }
     ]
   }

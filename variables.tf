@@ -1,14 +1,7 @@
-variable "RUNNER_ACCESS_TOKEN" {
+variable "PAT" {
   description = "GitHub personal access token"
-  type        = string
-  #default     = ""
+  type        = "string"
 }
-
-# variable "PERSONAL_ACCESS_TOKEN" {
-#   description = "GitHub personal access token"
-#   type        = string
-#   default     = ""
-# }
 
 variable "region" {
   description = "aws default region"
@@ -20,24 +13,12 @@ variable "profile" {
   default = "default"
 }
 
-# variable "AWS_SECRET_ACCESS_KEY" {
-#   description = "aws secret access token"
-#   type        = string
-#   default     = ""
-# }
-
-# variable "AWS_ACCESS_KEY_ID" {
-#   description = "aws access key"
-#   type        = string
-#   default     = ""
-# }
-
 variable "REPO_OWNER" {
-  type = string
+  type = "string"
   # default = "obynodavid12"
 }
 variable "REPO_NAME" {
-  type = string
+  type = "string"
   #default = "fargate-runner"
 }
 

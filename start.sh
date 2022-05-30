@@ -7,7 +7,7 @@ tar xzf ./actions-runner-linux-x64-2.276.1.tar.gz
 ./bin/installdependencies.sh
 mkdir /_work
 
-AUTH_HEADER="Authorization: token ${RUNNER_ACCESS_TOKEN}"
+AUTH_HEADER="Authorization: token ${PAT}"
 API_VERSION=v3
 API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
 _FULL_URL="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/runners/registration-token"

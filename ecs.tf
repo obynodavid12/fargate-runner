@@ -91,7 +91,7 @@ resource "aws_ecs_task_definition" "task_definition" {
       },
       "command": ["./start.sh"],
       "secrets": [
-        {"name": "RUNNER_ACCESS_TOKEN", "valueFrom": "${aws_secretsmanager_secret.RUNNER_ACCESS_TOKEN.arn}"}
+        {"name": "PAT", "valueFrom": "${aws_secretsmanager_secret.PAT.arn}"}
         
       ],
       "environment": [
