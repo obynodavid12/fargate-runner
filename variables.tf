@@ -1,4 +1,4 @@
-variable "PAT" {
+variable "PAT_ACCESS_TOKEN" {
   description = "GitHub personal access token"
   type        = string
 }
@@ -13,6 +13,10 @@ variable "profile" {
   default = "default"
 }
 
+variable "secret_retention_days" {
+  default     = 0
+  description = "Number of days before secret is actually deleted. Increasing this above 0 will result in Terraform errors if you redeploy to the same workspace."
+}
 variable "RUNNER_REPOSITORY_URL" {
   type = string
 }

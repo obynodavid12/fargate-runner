@@ -1,11 +1,12 @@
 # Secrets
-resource "aws_secretsmanager_secret" "PAT" {
-  name = "${var.prefix}-PAT"
+resource "aws_secretsmanager_secret" "PAT_ACCESS_TOKEN" {
+  name                    = "${var.prefix}-PAT_ACCESS_TOKEN"
+  recovery_window_in_days = var.secret_retention_days
 }
 
-resource "aws_secretsmanager_secret_version" "PAT" {
-  secret_id     = aws_secretsmanager_secret.PAT.id
-  secret_string = var.PAT
+resource "aws_secretsmanager_secret_version" "PAT_ACCESS_TOKEN" {
+  secret_id     = aws_secretsmanager_secret.PAT_ACCESS_TOKEN.id
+  secret_string = var.PAT_ACCESS_TOKEN
 }
 
 
@@ -23,7 +24,7 @@ resource "aws_iam_role_policy" "password_policy_secretsmanager" {
           "secretsmanager:GetSecretValue"
         ],
         "Effect": "Allow",
-        "Resource": "${aws_secretsmanager_secret.PAT.arn}"
+        "Resource": "${aws_secretsmanager_secret.PAT_ACCESS_TOKEN.arn}"
       }
     ]
   }
