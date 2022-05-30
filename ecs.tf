@@ -90,12 +90,8 @@ resource "aws_ecs_task_definition" "task_definition" {
         }
       },
       "command": ["./start.sh"],
-      "secrets": [
-        {"name": "PERSONAL_ACCESS_TOKEN", "valueFrom": "${aws_secretsmanager_secret.PERSONAL_ACCESS_TOKEN.arn}"},
-        {"name": "AWS_SECRET_ACCESS_KEY", "valueFrom": "${aws_secretsmanager_secret.AWS_SECRET_ACCESS_KEY.arn}"},
-        {"name": "AWS_ACCESS_KEY_ID", "valueFrom": "${aws_secretsmanager_secret.AWS_ACCESS_KEY_ID.arn}"},
-        {"name": "AWS_DEFAULT_REGION", "valueFrom": "${aws_secretsmanager_secret.AWS_DEFAULT_REGION.arn}"}
-      ],
+      "secrets": [{"name": "RUNNER_ACCESS_TOKEN", "valueFrom": "${aws_secretsmanager_secret.RUNNER_ACCESS_TOKEN.arn}"}],
+        
       "environment": [
         {"name": "REPO_OWNER", "value": "${var.REPO_OWNER}"},
         {"name": "REPO_NAME", "value": "${var.REPO_NAME}"}
@@ -107,29 +103,29 @@ resource "aws_ecs_task_definition" "task_definition" {
 }
 
 # A security group for ECS
-resource "aws_security_group" "ecs_sg" {
-  name        = "${var.prefix}-ecs-sg"
-  description = "Allow incoming traffic for ecs"
-  vpc_id      = aws_vpc.vpc.id
+# resource "aws_security_group" "ecs_sg" {
+#   name        = "${var.prefix}-ecs-sg"
+#   description = "Allow incoming traffic for ecs"
+#   vpc_id      = aws_vpc.vpc.id
 
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   ingress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  tags = {
-    Name = "${var.prefix}_ecs_sg"
-  }
-}
+#   tags = {
+#     Name = "${var.prefix}_ecs_sg"
+#   }
+# }
 
 resource "aws_ecs_service" "ecs_service" {
   name            = "${var.prefix}-ecs-service"
@@ -139,8 +135,8 @@ resource "aws_ecs_service" "ecs_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    security_groups  = [aws_security_group.ecs_sg.id]
-    subnets          = [aws_subnet.private_subnet.id]
+    security_groups  = [var.security_group_id]
+    subnets          = var.private_subnet_ids
     assign_public_ip = false
   }
 

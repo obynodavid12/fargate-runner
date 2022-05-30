@@ -10,11 +10,16 @@ terraform {
     }
   }
 
-  cloud {
-    organization = "Dataalgebra-Cloud"
+  # cloud {
+  #   organization = "Dataalgebra-Cloud"
 
-    workspaces {
-      name = "AWS-DataalgebraCloud"
-    }
-  }
+  #   workspaces {
+  #     name = "AWS-DataalgebraCloud"
+  #   }
+  # }
+} 
+provider "aws" {
+  region = "us-east-2"
+  alias = "oh"
+  profile = "default"
 }

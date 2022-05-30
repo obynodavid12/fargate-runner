@@ -1,26 +1,27 @@
-variable "PERSONAL_ACCESS_TOKEN" {
+variable "RUNNER_ACCESS_TOKEN" {
   description = "GitHub personal access token"
   type        = string
   default     = ""
 }
 
-variable "AWS_DEFAULT_REGION" {
-  description = "aws default region"
-  type        = string
-  default     = ""
-}
+# variable "AWS_DEFAULT_REGION" {
+#   description = "aws default region"
+#   type        = string
+#   default     = "us-east-2"
+# }
 
-variable "AWS_SECRET_ACCESS_KEY" {
-  description = "aws secret access token"
-  type        = string
-  default     = ""
-}
 
-variable "AWS_ACCESS_KEY_ID" {
-  description = "aws access key"
-  type        = string
-  default     = ""
-}
+# variable "AWS_SECRET_ACCESS_KEY" {
+#   description = "aws secret access token"
+#   type        = string
+#   default     = ""
+# }
+
+# variable "AWS_ACCESS_KEY_ID" {
+#   description = "aws access key"
+#   type        = string
+#   default     = ""
+# }
 
 variable "REPO_OWNER" {
   default = "obynodavid12"
@@ -33,21 +34,25 @@ variable "prefix" {
   default = "ecs-runner"
 }
 
-variable "vpc_cidr" {
-  description = "CIDR for the VPC"
-  default     = "172.31.0.0/16"
+variable "vpc_id" {
+  description = "VPC ID"
+  default     = "vpc-096711145f4fb2bd6"
 }
 
-variable "private_subnet_cidr" {
-  description = "CIDR for the Private Subnet"
-  default     = "172.31.32.0/20"
+variable "private_subnet_ids" {
+  description = "Private Subnet"
+  type = list(string)
+  default     = ["subnet-0009935232387340e","subnet-0261ff6eaa616becb"]
 }
 
-variable "public_subnet_cidr" {
-  description = "CIDR for the Public Subnet"
-  default     = "172.31.48.0/20"
-}
+# variable "public_subnet_cidr" {
+#   description = "CIDR for the Public Subnet"
+#   default     = "172.31.48.0/20"
+# }
 
+variable "security_group_id" {
+  default = "sg-0b543d3055cffedfb"
+}
 # variable "fargate_cpu" {
 #   description = "Fargate instance CPU units to provision"
 #   type        = number
