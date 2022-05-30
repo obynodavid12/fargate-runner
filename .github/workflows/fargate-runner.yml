@@ -85,7 +85,7 @@ jobs:
     - name: Terraform destroy
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       id: destroy
-      run: terraform destroy -auto-approve
+      run: terraform destroy -auto-approve -input=false -var "PAT=${{ secrets.PAT }}" -var "RUNNER_REPOSITORY_URL=${{ secrets.RUNNER_REPOSITORY_URL }}" -var "RUNNER_NAME=${{ secrets.RUNNER_NAME }}" -var "RUNNER_LABELS=${{ secrets.RUNNER_LABELS }}"
   
   build:
     needs: terraform
