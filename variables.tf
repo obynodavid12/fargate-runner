@@ -1,4 +1,7 @@
 variable "PAT_ACCESS_TOKEN" {}
+variable "RUNNER_NAME" {}
+variable "RUNNER_LABELS" {}
+variable "RUNNER_REPOSITORY_URL" {}
 
 variable "region" {
   description = "aws default region"
@@ -14,10 +17,6 @@ variable "secret_retention_days" {
   default     = 0
   description = "Number of days before secret is actually deleted. Increasing this above 0 will result in Terraform errors if you redeploy to the same workspace."
 }
-variable "RUNNER_NAME" {}
-variable "RUNNER_LABELS" {}
-
-variable "RUNNER_REPOSITORY_URL" {}
 
 variable "prefix" {
   default = "ecs-runner"
