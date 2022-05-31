@@ -82,10 +82,10 @@ jobs:
            tfoutput.json
            
      
-    # - name: Terraform destroy
-    #   if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    #   id: destroy
-    #   run: terraform destroy -auto-approve -input=false -var "PAT_ACCESS_TOKEN=${{ secrets.PAT_ACCESS_TOKEN }}" -var "RUNNER_REPOSITORY_URL=${{ secrets.RUNNER_REPOSITORY_URL }}" -var "RUNNER_NAME=${{ secrets.RUNNER_NAME }}" -var "RUNNER_LABELS=${{ secrets.RUNNER_LABELS }}"
+    - name: Terraform destroy
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      id: destroy
+      run: terraform destroy -auto-approve -input=false -var "PAT_ACCESS_TOKEN=${{ secrets.PAT_ACCESS_TOKEN }}" -var "RUNNER_REPOSITORY_URL=${{ env.RUNNER_REPOSITORY_URL }}" -var "RUNNER_NAME=${{ env.RUNNER_NAME }}" -var "RUNNER_LABELS=${{ env.RUNNER_LABELS }}"
   
   build:
     needs: terraform
